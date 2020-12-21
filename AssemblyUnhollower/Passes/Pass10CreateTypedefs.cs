@@ -35,6 +35,12 @@ namespace AssemblyUnhollower.Passes
 
         private static string GetConvertedTypeName(RewriteGlobalContext assemblyContextGlobalContext, TypeDefinition type)
         {
+            var mapped = type.GetMapped();
+            if (mapped != null)
+            {
+                return mapped;
+            }
+
             if (type.Name.IsInvalidInSource())
             {
                 var newNameBase = assemblyContextGlobalContext.RenamedTypes[type];

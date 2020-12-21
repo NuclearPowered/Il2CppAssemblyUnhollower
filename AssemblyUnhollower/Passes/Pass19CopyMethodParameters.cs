@@ -29,6 +29,8 @@ namespace AssemblyUnhollower.Passes
                             else
                                 newParameter.Attributes &= ~ParameterAttributes.HasDefault;
 
+                            newParameter.AddObfuscatedName(assemblyContext, originalMethodParameter.Name, newParameter.Name);
+
                             newMethod.Parameters.Add(newParameter);
                         }
                     }

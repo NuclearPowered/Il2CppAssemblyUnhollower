@@ -65,6 +65,8 @@ namespace AssemblyUnhollower.Contexts
         {
             UnmangledName = UnmangleMethodName();
             UnmangledNameWithSignature = UnmangleMethodNameWithSignature();
+            
+            NewMethod.AddObfuscatedName(DeclaringType.AssemblyContext, OriginalMethod.Name, UnmangledName);
 
             NewMethod.Name = UnmangledName;
             NewMethod.ReturnType = DeclaringType.AssemblyContext.RewriteTypeRef(OriginalMethod.ReturnType);
@@ -134,6 +136,13 @@ namespace AssemblyUnhollower.Contexts
         private string UnmangleMethodName()
         {
             var method = OriginalMethod;
+
+            var mapped = method.GetMapped();
+            if (mapped != null)
+            {
+                return mapped;
+            }
+            
             if(method.Name.IsInvalidInSource() && method.Name != ".ctor")
                 return UnmangleMethodNameWithSignature();
 

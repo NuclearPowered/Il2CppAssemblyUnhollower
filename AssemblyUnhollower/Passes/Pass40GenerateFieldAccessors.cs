@@ -20,6 +20,8 @@ namespace AssemblyUnhollower.Passes
 
                         var property = new PropertyDefinition(unmangleFieldName, PropertyAttributes.None,
                             assemblyContext.RewriteTypeRef(fieldContext.OriginalField.FieldType));
+
+                        property.AddObfuscatedName(assemblyContext, fieldContext.OriginalField.Name, unmangleFieldName);
                         typeContext.NewType.Properties.Add(property);
 
                         FieldAccessorGenerator.MakeGetter(field, fieldContext, property, assemblyContext.Imports);

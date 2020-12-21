@@ -24,14 +24,26 @@ namespace AssemblyUnhollower.Passes
                         foreach (var oldParameter in oldProperty.Parameters)
                             property.Parameters.Add(new ParameterDefinition(oldParameter.Name, oldParameter.Attributes,
                                 assemblyContext.RewriteTypeRef(oldParameter.ParameterType)));
-                        
+
+                        property.AddObfuscatedName(assemblyContext, oldProperty.Name, unmangledPropertyName);
+
                         typeContext.NewType.Properties.Add(property);
 
                         if (oldProperty.GetMethod != null)
-                            property.GetMethod = typeContext.GetMethodByOldMethod(oldProperty.GetMethod).NewMethod;
+                        {
+                            var getMethod = typeContext.GetMethodByOldMethod(oldProperty.GetMethod);
+                            property.GetMethod = getMethod.NewMethod;
+
+                            property.GetMethod.AddObfuscatedName(assemblyContext, getMethod.OriginalMethod.Name, getMethod.UnmangledName);
+                        }
 
                         if (oldProperty.SetMethod != null)
-                            property.SetMethod = typeContext.GetMethodByOldMethod(oldProperty.SetMethod).NewMethod;
+                        {
+                            var setMethod = typeContext.GetMethodByOldMethod(oldProperty.SetMethod);
+                            property.SetMethod = setMethod.NewMethod;
+
+                            property.SetMethod.AddObfuscatedName(assemblyContext, setMethod.OriginalMethod.Name, setMethod.UnmangledName);
+                        }
                     }
 
                     var defaultMemberAttribute = type.CustomAttributes.FirstOrDefault(it =>
@@ -55,6 +67,12 @@ namespace AssemblyUnhollower.Passes
         
         private static string UnmanglePropertyName(AssemblyRewriteContext assemblyContext, PropertyDefinition prop)
         {
+            var mapped = prop.GetMapped();
+            if (mapped != null)
+            {
+                return mapped;
+            }
+
             if (!prop.Name.IsInvalidInSource()) return prop.Name;
 
             return "prop_" + assemblyContext.RewriteTypeRef(prop.PropertyType).GetUnmangledName() + "_" + prop.DeclaringType.Properties

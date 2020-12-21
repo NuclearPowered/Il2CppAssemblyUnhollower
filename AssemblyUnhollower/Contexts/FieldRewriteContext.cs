@@ -37,6 +37,12 @@ namespace AssemblyUnhollower.Contexts
         
         private string UnmangleFieldName(FieldDefinition field)
         {
+            var mapped = field.GetMapped();
+            if (mapped != null)
+            {
+                return mapped;
+            }
+
             if (!field.Name.IsInvalidInSource()) return field.Name;
 
             return UnmangleFieldNameBase(field) + "_" +

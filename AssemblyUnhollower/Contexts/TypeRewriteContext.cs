@@ -34,8 +34,7 @@ namespace AssemblyUnhollower.Contexts
             
             OriginalNameWasObfuscated = OriginalType.Name != NewType.Name;
             if (OriginalNameWasObfuscated)
-                NewType.CustomAttributes.Add(new CustomAttribute(assemblyContext.Imports.ObfuscatedNameAttributeCtor)
-                    {ConstructorArguments = {new CustomAttributeArgument(assemblyContext.Imports.String, originalType.FullName)}});
+                NewType.AddObfuscatedName(AssemblyContext, originalType.FullName);
             if (!OriginalType.IsValueType)
                 ComputedTypeSpecifics = TypeSpecifics.ReferenceType;
             else if (OriginalType.IsEnum)

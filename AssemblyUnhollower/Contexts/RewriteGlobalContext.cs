@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using AssemblyUnhollower.Extensions;
 using Mono.Cecil;
 
@@ -53,6 +54,11 @@ namespace AssemblyUnhollower.Contexts
 
         public AssemblyRewriteContext GetNewAssemblyForOriginal(AssemblyDefinition oldAssembly)
         {
+            if (oldAssembly.Name.Name == "mscorlib")
+            {
+                return myAssembliesByOld.Single(x => x.Key.FullName.Contains("mscorlib")).Value;
+            }
+            
             return myAssembliesByOld[oldAssembly];
         }
 
