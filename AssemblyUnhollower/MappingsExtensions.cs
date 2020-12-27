@@ -30,9 +30,9 @@ namespace AssemblyUnhollower
             });
         }
 
-        public static void AddObfuscatedName(this ICustomAttributeProvider cap, AssemblyRewriteContext assemblyContext, string originalName, string newName)
+        public static void AddObfuscatedName(this ICustomAttributeProvider cap, AssemblyRewriteContext assemblyContext, string originalName, string? newName)
         {
-            if (originalName != newName)
+            if (newName != null && originalName != newName)
             {
                 cap.AddObfuscatedName(assemblyContext, originalName);
             }

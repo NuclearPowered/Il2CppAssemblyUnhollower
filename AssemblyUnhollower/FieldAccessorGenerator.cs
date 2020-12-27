@@ -9,7 +9,7 @@ namespace AssemblyUnhollower
     {
         public static void MakeGetter(FieldDefinition field, FieldRewriteContext fieldContext, PropertyDefinition property, AssemblyKnownImports imports)
         {
-            var getter = new MethodDefinition("get_" + property.Name, Field2MethodAttrs(field.Attributes) | MethodAttributes.SpecialName | MethodAttributes.HideBySig, property.PropertyType);
+            var getter = new MethodDefinition("get_" + fieldContext.UnmangledName, Field2MethodAttrs(field.Attributes) | MethodAttributes.SpecialName | MethodAttributes.HideBySig, property.PropertyType);
             
             var getterBody = getter.Body.GetILProcessor();
             property.DeclaringType.Methods.Add(getter);
@@ -74,7 +74,7 @@ namespace AssemblyUnhollower
         
         public static void MakeSetter(FieldDefinition field, FieldRewriteContext fieldContext, PropertyDefinition property, AssemblyKnownImports imports)
         {
-            var setter = new MethodDefinition("set_" + property.Name, Field2MethodAttrs(field.Attributes) | MethodAttributes.SpecialName | MethodAttributes.HideBySig, imports.Void);
+            var setter = new MethodDefinition("set_" + fieldContext.UnmangledName, Field2MethodAttrs(field.Attributes) | MethodAttributes.SpecialName | MethodAttributes.HideBySig, imports.Void);
             setter.Parameters.Add(new ParameterDefinition(property.PropertyType));
             property.DeclaringType.Methods.Add(setter);
             var setterBody = setter.Body.GetILProcessor();

@@ -34,7 +34,7 @@ namespace AssemblyUnhollower.Contexts
             
             OriginalNameWasObfuscated = OriginalType.Name != NewType.Name;
             if (OriginalNameWasObfuscated)
-                NewType.AddObfuscatedName(AssemblyContext, originalType.FullName);
+                NewType.AddObfuscatedName(AssemblyContext, originalType.Name);
             if (!OriginalType.IsValueType)
                 ComputedTypeSpecifics = TypeSpecifics.ReferenceType;
             else if (OriginalType.IsEnum)

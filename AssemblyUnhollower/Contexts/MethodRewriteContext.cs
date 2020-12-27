@@ -63,10 +63,11 @@ namespace AssemblyUnhollower.Contexts
 
         public void CtorPhase2()
         {
-            UnmangledName = UnmangleMethodName();
+            var mapped = OriginalMethod.GetMapped();
+            UnmangledName = mapped ?? UnmangleMethodName();
             UnmangledNameWithSignature = UnmangleMethodNameWithSignature();
             
-            NewMethod.AddObfuscatedName(DeclaringType.AssemblyContext, OriginalMethod.Name, UnmangledName);
+            NewMethod.AddObfuscatedName(DeclaringType.AssemblyContext, OriginalMethod.Name, mapped);
 
             NewMethod.Name = UnmangledName;
             NewMethod.ReturnType = DeclaringType.AssemblyContext.RewriteTypeRef(OriginalMethod.ReturnType);
@@ -137,12 +138,6 @@ namespace AssemblyUnhollower.Contexts
         {
             var method = OriginalMethod;
 
-            var mapped = method.GetMapped();
-            if (mapped != null)
-            {
-                return mapped;
-            }
-            
             if(method.Name.IsInvalidInSource() && method.Name != ".ctor")
                 return UnmangleMethodNameWithSignature();
 

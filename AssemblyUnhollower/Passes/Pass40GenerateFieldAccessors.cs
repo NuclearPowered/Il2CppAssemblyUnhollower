@@ -16,12 +16,13 @@ namespace AssemblyUnhollower.Passes
                         if (typeContext.ComputedTypeSpecifics == TypeRewriteContext.TypeSpecifics.BlittableStruct && !fieldContext.OriginalField.IsStatic) continue;
 
                         var field = fieldContext.OriginalField;
-                        var unmangleFieldName = fieldContext.UnmangledName;
+                        var mapped = fieldContext.OriginalField.GetMapped();
+                        var unmangleFieldName = mapped ?? fieldContext.UnmangledName;
 
                         var property = new PropertyDefinition(unmangleFieldName, PropertyAttributes.None,
                             assemblyContext.RewriteTypeRef(fieldContext.OriginalField.FieldType));
 
-                        property.AddObfuscatedName(assemblyContext, fieldContext.OriginalField.Name, unmangleFieldName);
+                        property.AddObfuscatedName(assemblyContext, fieldContext.OriginalField.Name, mapped);
                         typeContext.NewType.Properties.Add(property);
 
                         FieldAccessorGenerator.MakeGetter(field, fieldContext, property, assemblyContext.Imports);

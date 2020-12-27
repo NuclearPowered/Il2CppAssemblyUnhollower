@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Reflection;
 using AssemblyUnhollower.Contexts;
@@ -17,7 +18,8 @@ namespace AssemblyUnhollower.Passes
                     var type = typeContext.OriginalType;
                     foreach (var oldProperty in type.Properties)
                     {
-                        var unmangledPropertyName = UnmanglePropertyName(assemblyContext, oldProperty);
+                        var mapped = oldProperty.GetMapped();
+                        var unmangledPropertyName = mapped ?? UnmanglePropertyName(assemblyContext, oldProperty);
 
                         var property = new PropertyDefinition(unmangledPropertyName, oldProperty.Attributes,
                             assemblyContext.RewriteTypeRef(oldProperty.PropertyType));
@@ -25,7 +27,7 @@ namespace AssemblyUnhollower.Passes
                             property.Parameters.Add(new ParameterDefinition(oldParameter.Name, oldParameter.Attributes,
                                 assemblyContext.RewriteTypeRef(oldParameter.ParameterType)));
 
-                        property.AddObfuscatedName(assemblyContext, oldProperty.Name, unmangledPropertyName);
+                        property.AddObfuscatedName(assemblyContext, oldProperty.Name, mapped);
 
                         typeContext.NewType.Properties.Add(property);
 
@@ -33,16 +35,12 @@ namespace AssemblyUnhollower.Passes
                         {
                             var getMethod = typeContext.GetMethodByOldMethod(oldProperty.GetMethod);
                             property.GetMethod = getMethod.NewMethod;
-
-                            property.GetMethod.AddObfuscatedName(assemblyContext, getMethod.OriginalMethod.Name, getMethod.UnmangledName);
                         }
 
                         if (oldProperty.SetMethod != null)
                         {
                             var setMethod = typeContext.GetMethodByOldMethod(oldProperty.SetMethod);
                             property.SetMethod = setMethod.NewMethod;
-
-                            property.SetMethod.AddObfuscatedName(assemblyContext, setMethod.OriginalMethod.Name, setMethod.UnmangledName);
                         }
                     }
 
@@ -64,15 +62,9 @@ namespace AssemblyUnhollower.Passes
                 }
             }
         }
-        
+
         private static string UnmanglePropertyName(AssemblyRewriteContext assemblyContext, PropertyDefinition prop)
         {
-            var mapped = prop.GetMapped();
-            if (mapped != null)
-            {
-                return mapped;
-            }
-
             if (!prop.Name.IsInvalidInSource()) return prop.Name;
 
             return "prop_" + assemblyContext.RewriteTypeRef(prop.PropertyType).GetUnmangledName() + "_" + prop.DeclaringType.Properties

@@ -1,0 +1,10 @@
+<Project>
+
+    <PropertyGroup>
+        <Version>0.4.12</Version>
+
+        <RepositoryType>git</RepositoryType>
+        <RepositoryUrl>https://github.com/NuclearPowered/Il2CppAssemblyUnhollower</RepositoryUrl>
+    </PropertyGroup>
+
+</Project>
