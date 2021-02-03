@@ -18,6 +18,11 @@ namespace AssemblyUnhollower.Passes
         private static void ProcessType(TypeDefinition type, AssemblyRewriteContext assemblyContext, TypeDefinition? parentType)
         {
             var newType = new TypeDefinition(type.Namespace.UnSystemify(), GetConvertedTypeName(assemblyContext.GlobalContext, type), AdjustAttributes(type.Attributes));
+
+            if (type.IsSealed && type.IsAbstract) // is static
+            {
+                newType.IsSealed = newType.IsAbstract = true;
+            }
             
             if(parentType == null)
                 assemblyContext.NewAssembly.MainModule.Types.Add(newType);
