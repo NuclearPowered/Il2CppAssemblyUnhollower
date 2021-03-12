@@ -4,9 +4,7 @@ using System.IO;
 using System.Linq;
 using AssemblyUnhollower.Contexts;
 using AssemblyUnhollower.Passes;
-using Iced.Intel;
 using UnhollowerBaseLib;
-using UnhollowerRuntimeLib;
 
 namespace AssemblyUnhollower
 {
@@ -177,11 +175,8 @@ namespace AssemblyUnhollower
                 Pass13FillGenericConstraints.DoPass(rewriteContext);
             using(new TimingCookie("Creating members"))
                 Pass15GenerateMemberContexts.DoPass(rewriteContext);
-            using(new TimingCookie("Scanning method cross-references"))
-                Pass16ScanMethodRefs.DoPass(rewriteContext, options);
             using(new TimingCookie("Finalizing method declarations"))
                 Pass18FinalizeMethodContexts.DoPass(rewriteContext);
-            LogSupport.Info($"{Pass18FinalizeMethodContexts.TotalPotentiallyDeadMethods} total potentially dead methods");
             using(new TimingCookie("Filling method parameters"))
                 Pass19CopyMethodParameters.DoPass(rewriteContext);
             
@@ -223,23 +218,13 @@ namespace AssemblyUnhollower
             
             using(new TimingCookie("Generating forwarded types"))
                 Pass89GenerateForwarders.DoPass(rewriteContext);
-            
-            using(new TimingCookie("Writing xref cache"))
-                Pass89GenerateMethodXrefCache.DoPass(rewriteContext, options);
-            
+
             using(new TimingCookie("Writing assemblies"))
                 Pass90WriteToDisk.DoPass(rewriteContext, options);
             
             using(new TimingCookie("Writing method pointer map"))
                 Pass91GenerateMethodPointerMap.DoPass(rewriteContext, options);
 
-            if (!options.NoCopyUnhollowerLibs)
-            {
-                File.Copy(typeof(IL2CPP).Assembly.Location, Path.Combine(options.OutputDir, typeof(IL2CPP).Assembly.GetName().Name + ".dll"), true);
-                File.Copy(typeof(RuntimeLibMarker).Assembly.Location, Path.Combine(options.OutputDir, typeof(RuntimeLibMarker).Assembly.GetName().Name + ".dll"), true);
-                File.Copy(typeof(Decoder).Assembly.Location, Path.Combine(options.OutputDir, typeof(Decoder).Assembly.GetName().Name + ".dll"), true);
-            }
-            
             LogSupport.Info("Done!");
 
             rewriteContext.Dispose();

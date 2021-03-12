@@ -10,7 +10,7 @@ using System.Threading;
 using UnhollowerBaseLib;
 using UnhollowerBaseLib.Attributes;
 using UnhollowerBaseLib.Runtime;
-using UnhollowerRuntimeLib.XrefScans;
+using UnhollowerBaseLib.XrefScans;
 using Void = Il2CppSystem.Void;
 
 namespace UnhollowerRuntimeLib

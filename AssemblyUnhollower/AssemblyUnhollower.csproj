@@ -10,7 +10,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Iced" Version="1.10.0" />
       <PackageReference Include="Mono.Cecil" Version="0.11.3" />
       <PackageReference Include="Teronis.MSBuild.Packaging.ProjectBuildInPackage" Version="0.1.7">
         <PrivateAssets>all</PrivateAssets>
