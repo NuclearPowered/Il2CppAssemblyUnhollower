@@ -67,12 +67,14 @@ namespace AssemblyUnhollower.Contexts
             }
 
             if (OriginalType.IsEnum) return;
+
+            var renamedFieldCounts = new Dictionary<string, int>();
             
             foreach (var originalTypeField in OriginalType.Fields)
             {
                 if (originalTypeField.Name.EndsWith(">k__BackingField")) continue; // covered by properties anyway
                 
-                myFieldContexts[originalTypeField] = new FieldRewriteContext(this, originalTypeField);
+                myFieldContexts[originalTypeField] = new FieldRewriteContext(this, originalTypeField, renamedFieldCounts);
             }
             
             foreach (var originalTypeMethod in OriginalType.Methods)
@@ -110,6 +112,22 @@ namespace AssemblyUnhollower.Contexts
                 if (badMethod) continue;
 
                 return methodRewriteContext.Value;
+            }
+
+            return null;
+        }
+        
+        public FieldRewriteContext? TryGetFieldByUnityAssemblyField(FieldDefinition field)
+        {
+            foreach (var fieldRewriteContext in myFieldContexts)
+            {
+                var originalField = fieldRewriteContext.Value.OriginalField;
+                if (originalField.Name != field.Name) continue;
+
+                if (originalField.FieldType.FullName != field.FieldType.FullName)
+                    continue;
+
+                return fieldRewriteContext.Value;
             }
 
             return null;

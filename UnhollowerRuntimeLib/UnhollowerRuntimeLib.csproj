@@ -1,6 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <PackageId>Il2CppAssemblyUnhollower.BaseLib.Legacy</PackageId>
+        <Authors>knah et al.</Authors>
         <TargetFrameworks>net4.7.2;netstandard2.1</TargetFrameworks>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <LangVersion>latest</LangVersion>

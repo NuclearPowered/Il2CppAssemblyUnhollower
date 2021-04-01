@@ -1,6 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <PackageId>Il2CppAssemblyUnhollower.BaseLib</PackageId>
+        <Authors>knah et al.</Authors>
         <TargetFrameworks>net4.7.2;netstandard2.1</TargetFrameworks>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <LangVersion>latest</LangVersion>
@@ -23,5 +25,9 @@
 
     <ItemGroup>
         <PackageReference Include="Iced" Version="1.10.0" />
+        <PackageReference Include="IsExternalInit" Version="1.0.0">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
     </ItemGroup>
 </Project>

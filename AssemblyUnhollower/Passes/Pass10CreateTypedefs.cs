@@ -17,7 +17,8 @@ namespace AssemblyUnhollower.Passes
 
         private static void ProcessType(TypeDefinition type, AssemblyRewriteContext assemblyContext, TypeDefinition? parentType)
         {
-            var newType = new TypeDefinition(type.Namespace.UnSystemify(), GetConvertedTypeName(assemblyContext.GlobalContext, type), AdjustAttributes(type.Attributes));
+            var convertedTypeName = GetConvertedTypeName(assemblyContext.GlobalContext, type, parentType);
+            var newType = new TypeDefinition(convertedTypeName.Namespace ?? type.Namespace.UnSystemify(), convertedTypeName.Name, AdjustAttributes(type.Attributes));
 
             if (type.IsSealed && type.IsAbstract) // is static
             {
@@ -38,25 +39,49 @@ namespace AssemblyUnhollower.Passes
             assemblyContext.RegisterTypeRewrite(new TypeRewriteContext(assemblyContext, type, newType));
         }
 
-        private static string GetConvertedTypeName(RewriteGlobalContext assemblyContextGlobalContext, TypeDefinition type)
+        internal static (string? Namespace, string Name) GetConvertedTypeName(RewriteGlobalContext assemblyContextGlobalContext, TypeDefinition type, TypeDefinition? enclosingType)
         {
             var mapped = type.GetMapped();
             if (mapped != null)
             {
-                return mapped;
+                return (null, mapped);
             }
 
-            if (type.Name.IsInvalidInSource())
+            if (assemblyContextGlobalContext.Options.PassthroughNames)
+                return (null, type.Name);
+
+            if (type.Name.IsObfuscated(assemblyContextGlobalContext.Options))
             {
                 var newNameBase = assemblyContextGlobalContext.RenamedTypes[type];
                 var genericParametersCount = type.GenericParameters.Count;
                 var renameGroup =
                     assemblyContextGlobalContext.RenameGroups[((object) type.DeclaringType ?? type.Namespace, newNameBase, genericParametersCount)];
                 var genericSuffix = genericParametersCount == 0 ? "" : "`" + genericParametersCount;
-                return newNameBase + (renameGroup.Count == 1 ? "Unique" : renameGroup.IndexOf(type).ToString()) + genericSuffix;
+                var convertedTypeName = newNameBase + (renameGroup.Count == 1 ? "Unique" : renameGroup.IndexOf(type).ToString()) + genericSuffix;
+
+                var fullName = enclosingType == null
+                    ? type.Namespace
+                    : (enclosingType.GetNamespacePrefix() + "." + enclosingType.Name);
+
+                if (assemblyContextGlobalContext.Options.RenameMap.TryGetValue(fullName + "." + convertedTypeName, out var newName))
+                {
+                    var lastDotPosition = newName.LastIndexOf(".");
+                    if (lastDotPosition >= 0)
+                    {
+                        var ns = newName.Substring(0, lastDotPosition);
+                        var name = newName.Substring(lastDotPosition + 1);
+                        return (ns, name);
+                    } else 
+                        convertedTypeName = newName;
+                }
+
+                return (null, convertedTypeName);
             }
 
-            return type.Name;
+            if (type.Name.IsInvalidInSource())
+                return (null, type.Name.FilterInvalidInSourceChars());
+
+            return (null, type.Name);
         }
 
         private static TypeAttributes AdjustAttributes(TypeAttributes typeAttributes)

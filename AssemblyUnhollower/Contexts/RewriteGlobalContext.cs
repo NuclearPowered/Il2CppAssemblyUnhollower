@@ -42,9 +42,15 @@ namespace AssemblyUnhollower.Contexts
                     sourceAssembly.MainModule.Name.UnSystemify(), sourceAssembly.MainModule.Kind);
 
                 var assemblyRewriteContext = new AssemblyRewriteContext(this, sourceAssembly, newAssembly);
-                myAssemblies[assemblyName] = assemblyRewriteContext;
-                myAssembliesByOld[sourceAssembly] = assemblyRewriteContext;
+                AddAssemblyContext(assemblyName, assemblyRewriteContext);
             }
+        }
+
+        internal void AddAssemblyContext(string assemblyName, AssemblyRewriteContext context)
+        {
+            myAssemblies[assemblyName] = context;
+            if (context.OriginalAssembly != null)
+                myAssembliesByOld[context.OriginalAssembly] = context;
         }
         
         private class Resolver : DefaultAssemblyResolver
@@ -68,6 +74,13 @@ namespace AssemblyUnhollower.Contexts
                 .GetContextForOriginalType(originalType);
         }
         
+        public TypeRewriteContext? TryGetNewTypeForOriginal(TypeDefinition originalType)
+        {
+            if (!myAssembliesByOld.TryGetValue(originalType.Module.Assembly, out var assembly))
+                return null;
+            return assembly.TryGetContextForOriginalType(originalType);
+        }
+        
         public TypeRewriteContext.TypeSpecifics JudgeSpecificsByOriginalType(TypeReference typeRef)
         {
             if (typeRef.IsPrimitive || typeRef.IsPointer || typeRef.FullName == "System.TypedReference") return TypeRewriteContext.TypeSpecifics.BlittableStruct;
@@ -85,7 +98,13 @@ namespace AssemblyUnhollower.Contexts
         
         public AssemblyRewriteContext? TryGetAssemblyByName(string name)
         {
-            return myAssemblies.TryGetValue(name, out var result) ? result : null;
+            if (myAssemblies.TryGetValue(name, out var result))
+                return result;
+
+            if (name == "netstandard")
+                return myAssemblies.TryGetValue("mscorlib", out var result2) ? result2 : null;
+            
+            return null;
         }
 
         public void Dispose()
