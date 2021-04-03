@@ -44,7 +44,8 @@ namespace AssemblyUnhollower.Passes
             var mapped = type.GetMapped();
             if (mapped != null)
             {
-                return (null, mapped);
+                var lastIndexOf = mapped.LastIndexOf('.');
+                return lastIndexOf == -1 ? (null, mapped) : (mapped.Substring(0, lastIndexOf), mapped.Substring(lastIndexOf + 1));
             }
 
             if (assemblyContextGlobalContext.Options.PassthroughNames)
